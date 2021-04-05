@@ -7,9 +7,7 @@ public class Main {
         WithdrawThread wifeThread = new WithdrawThread("Wife", 15000000);
         wifeThread.start();
         husbandThread.start();
-
     }
-
 }
 
 class BankAccount{

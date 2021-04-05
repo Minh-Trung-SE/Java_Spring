@@ -7,6 +7,7 @@ public class Main {
         WithdrawThread wifeThread = new WithdrawThread("Wife", 10000000);
         wifeThread.start();
         husbandThread.start();
+        bankAccount.showMoney();
     }
 }
 
@@ -16,16 +17,28 @@ class BankAccount{
         System.out.println(threadName + " need: " + withdrawAmount);
         if(withdrawAmount <= BankAccount.amount){
             BankAccount.amount = BankAccount.amount - withdrawAmount;
-            System.out.println(threadName + " withdraw " + withdrawAmount + " success!");
+            System.out.println(threadName + " withdraw " + withdrawAmount + " success!" +
+                    " Balance: " + BankAccount.amount);
         }else{
-            System.out.println(threadName + " withdraw " + withdrawAmount + " failed!");
+            System.out.println(threadName + " withdraw " + withdrawAmount + " failed!" +
+                    " Balance: " + BankAccount.amount);
         }
-        System.out.println(threadName + " see balance: " + BankAccount.amount);
     }
 
     public synchronized void addMoney(String nameThread, long addAmount){
         BankAccount.amount = addAmount + BankAccount.amount;
-        System.out.println(nameThread + " add " + addAmount + " success!");
+        System.out.println(nameThread + " add " + addAmount + " success!"
+                            + "\nBalance: " + BankAccount.amount);
+    }
+
+    public void showMoney(){
+        try {
+            Thread.sleep(600);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("===========================");
+        System.out.println("Balance:" + BankAccount.amount);
     }
 }
 
@@ -44,11 +57,10 @@ class WithdrawThread extends Thread{
         bankAccount.withdraw(threadName, withdrawAmount);
         System.out.println();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         bankAccount.addMoney(threadName, withdrawAmount);
-        System.out.println("Balance: " + BankAccount.amount);
     }
 }

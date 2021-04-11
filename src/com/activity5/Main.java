@@ -1,7 +1,7 @@
 package com.activity5;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         findDivisor findDivisor = new findDivisor();
         findDivisor.createThread();
 
@@ -48,7 +48,7 @@ class thread extends Thread{
             count = 0;
             for(int j = 1; j <= Math.sqrt(i); j++){
                 if(i % j == 0){
-                    count ++;
+                    count += 2;
                 }
             }
             if(count >= bigCount){
@@ -62,9 +62,9 @@ class thread extends Thread{
                 findDivisor.biggestDivisor = number;
                 findDivisor.count = bigCount;
             }
-
-            System.out.println(number + " big number owned " + bigCount + " divisor");
-            System.out.println(this.getName() + " " + System.currentTimeMillis() / 1000 + " finish! \n");
         }
+
+        System.out.println(number + " big number owned " + bigCount + " divisor");
+        System.out.println(this.getName() + " " + System.currentTimeMillis() / 1000 + " finish! \n");
     }
 }

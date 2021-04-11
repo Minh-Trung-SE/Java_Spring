@@ -1,7 +1,5 @@
 package com.activity5;
 
-import java.util.Queue;
-
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         findDivisor findDivisor = new findDivisor();
@@ -48,7 +46,7 @@ class thread extends Thread{
         System.out.println(this.getName() + " " + System.currentTimeMillis() / 1000 + " running!");
         for(int i = startNumber; i <= endNumber; i++){
             count = 0;
-            for(int j = 1; j <= i; j++){
+            for(int j = 1; j <= Math.sqrt(i); j++){
                 if(i % j == 0){
                     count ++;
                 }

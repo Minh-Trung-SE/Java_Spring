@@ -64,6 +64,7 @@ class thread extends Thread{
                 findDivisor.biggestDivisor = number;
                 findDivisor.count = bigCount;
             }
+
             System.out.println(number + " big number owned " + bigCount + " divisor");
             System.out.println(this.getName() + " " + System.currentTimeMillis() / 1000 + " finish! \n");
         }

@@ -16,16 +16,19 @@ public class Main {
 
 class BankAccount{
     protected static long amount = 20000000;
-    public synchronized void withdraw(String threadName, long withdrawAmount){
-        System.out.println(threadName + " need: " + withdrawAmount);
-        if(withdrawAmount <= BankAccount.amount){
-            BankAccount.amount = BankAccount.amount - withdrawAmount;
-            System.out.println(threadName + " withdraw " + withdrawAmount + " success!" +
-                    " Balance: " + BankAccount.amount + " " + System.currentTimeMillis());
-        }else{
-            System.out.println(threadName + " withdraw " + withdrawAmount + " failed!" +
-                    " Balance: " + BankAccount.amount + " " + System.currentTimeMillis());
+    public  void withdraw(String threadName, long withdrawAmount){
+        synchronized(this){
+            System.out.println(threadName + " need: " + withdrawAmount + " see balance: " + BankAccount.amount);
+            if(withdrawAmount <= BankAccount.amount){
+                BankAccount.amount = BankAccount.amount - withdrawAmount;
+                System.out.println(threadName + " withdraw " + withdrawAmount + " success!" +
+                        " Balance: " + BankAccount.amount + " " + System.currentTimeMillis());
+            }else{
+                System.out.println(threadName + " withdraw " + withdrawAmount + " failed!" +
+                        " Balance: " + BankAccount.amount + " " + System.currentTimeMillis());
+            }
         }
+
     }
 
     public synchronized void addMoney(String nameThread, long addAmount){

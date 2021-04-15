@@ -43,7 +43,7 @@ class thread extends Thread{
     @Override
     public void run() {
         int number = startNumber, bigCount = 0, count = 0;
-        System.out.println(this.getName() + " " + System.currentTimeMillis() / 1000 + " running!");
+        System.out.println(this.getName() + " " + System.currentTimeMillis()/1000 + " running!");
         for(int i = startNumber; i <= endNumber; i++){
             count = 0;
             for(int j = 1; j <= Math.sqrt(i); j++){
@@ -64,7 +64,10 @@ class thread extends Thread{
             }
         }
 
-        System.out.println(number + " big number owned " + bigCount + " divisor");
-        System.out.println(this.getName() + " " + System.currentTimeMillis() / 1000 + " finish! \n");
+        System.out.println(this.getName() + " " + System.currentTimeMillis() + " finish! \n");
+        if(endNumber == findDivisor.endNumber){
+            System.out.println("Biggest number: " + findDivisor.biggestDivisor +" owned: " + findDivisor.count + " divisor");
+        }
+
     }
 }

@@ -17,8 +17,7 @@ public class Users {
 
     public void userLogin(String user_phone, String user_password) throws SQLException {
         String query, phone = null, password = null;
-        DBConnector dbConnector = new DBConnector();
-        DBConnector.connection = dbConnector.getConnectionDB();
+        DBConnector.getConnectionDB();
         Statement statement = DBConnector.connection.createStatement();
         query = "SELECT user_phone, user_password FROM book.users WHERE user_phone = '" + user_phone + "';";
         ResultSet resultSet = statement.executeQuery(query);
@@ -63,9 +62,10 @@ public class Users {
 
     public void userRegister(Users user) throws SQLException {
         String query;
-        DBConnector dbConnector = new DBConnector();
-        DBConnector.connection = dbConnector.getConnectionDB();
+
+        DBConnector.getConnectionDB();
         Statement statement = DBConnector.connection.createStatement();
+
         query = "SELECT user_phone FROM book.users WHERE user_phone = '" + user.getUser_phone() +"';";
         ResultSet resultSet = statement.executeQuery(query);
         if(resultSet.next()){

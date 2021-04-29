@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class DBConnector {
     public static Connection connection;
-    public static void getConnectionDB(){
+    public static Connection getConnectionDB(){
         if(connection == null){
             try {
                 String PASSWORD = "Minhtrung1772k1";
@@ -16,5 +16,6 @@ public class DBConnector {
                 e.printStackTrace();
             }
         }
+        return connection;
     }
 }

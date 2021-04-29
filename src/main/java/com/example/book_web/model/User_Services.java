@@ -1,24 +1,25 @@
 package com.example.book_web.model;
 
 import com.example.book_web.dbconnection.DBConnector;
-import lombok.Getter;
-import lombok.Setter;
+import com.example.book_web.entity.Users;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@Getter @Setter
-public class Users {
-    public String user_phone;
-    public String user_password;
-    public String user_name;
-    public String user_email;
+public class User_Services {
+
+    Connection connection;
+    public User_Services() {
+        this.connection = DBConnector.connection;
+    }
 
     public void userLogin(String user_phone, String user_password) throws SQLException {
+        Statement statement = connection.createStatement();
+
         String query, phone = null, password = null;
-        DBConnector.getConnectionDB();
-        Statement statement = DBConnector.connection.createStatement();
+
         query = "SELECT user_phone, user_password FROM book.users WHERE user_phone = '" + user_phone + "';";
         ResultSet resultSet = statement.executeQuery(query);
         if(resultSet.next()){

@@ -12,7 +12,7 @@ public class User_Services {
 
     Connection connection;
     public User_Services() {
-        this.connection = DBConnector.connection;
+        this.connection = DBConnector.getConnectionDB();
     }
 
     public void userLogin(String user_phone, String user_password) throws SQLException {

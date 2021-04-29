@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class Book_Services {
     Connection connection;
     public Book_Services() {
-        this.connection = DBConnector.connection;
+        this.connection = DBConnector.getConnectionDB();
     }
 
     public HashMap<Integer, String> getCategories(){

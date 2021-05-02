@@ -5,11 +5,11 @@ import lombok.Setter;
 
 @Getter @Setter
 public class Books {
-    public String book_id;
-    public String book_title;
-    public int category_id;
-    public String link_photo;
-    public int release_year;
+    public String bookId;
+    public String bookTitle;
+    public int categoryId;
+    public String linkPhoto;
+    public int releaseYear;
     public String description;
     public String author;
     public long price;
@@ -18,11 +18,11 @@ public class Books {
     @Override
     public String toString() {
         return "Books{" +
-                "book_id=" + book_id +
-                ", book_title='" + book_title + '\'' +
-                ", category_id=" + category_id +
-                ", link_photo='" + link_photo + '\'' +
-                ", release_year=" + release_year +
+                "book_id=" + bookId +
+                ", book_title='" + bookTitle + '\'' +
+                ", category_id=" + categoryId +
+                ", link_photo='" + linkPhoto + '\'' +
+                ", release_year=" + releaseYear +
                 ", description='" + description + '\'' +
                 ", author='" + author + '\'' +
                 ", price=" + price +

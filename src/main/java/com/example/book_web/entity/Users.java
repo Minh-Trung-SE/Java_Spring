@@ -10,8 +10,8 @@ import java.sql.Statement;
 
 @Getter @Setter
 public class Users {
-    public String user_phone;
-    public String user_password;
-    public String user_name;
-    public String user_email;
+    public String userPhone;
+    public String userPassword;
+    public String userName;
+    public String userEmail;
 }

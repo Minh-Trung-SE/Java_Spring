@@ -1,4 +1,4 @@
-package com.example.book_web.model;
+package com.example.book_web.services;
 
 import com.example.book_web.dbconnection.DBConnector;
 import com.example.book_web.entity.Users;

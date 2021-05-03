@@ -1,10 +1,9 @@
-package com.example.book_web.model;
+package com.example.book_web.services;
 
 import com.example.book_web.dbconnection.DBConnector;
 import com.example.book_web.entity.BookFavourite;
 import com.example.book_web.entity.Books;
 import com.example.book_web.entity.Response;
-import org.apache.tomcat.util.net.jsse.JSSEUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

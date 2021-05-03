@@ -1,7 +1,7 @@
 package com.example.book_web.urlcontroler;
 
 import com.example.book_web.entity.Users;
-import com.example.book_web.model.UserServices;
+import com.example.book_web.services.UserServices;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

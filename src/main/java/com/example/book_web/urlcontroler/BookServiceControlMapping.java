@@ -2,7 +2,7 @@ package com.example.book_web.urlcontroler;
 
 import com.example.book_web.entity.BookFavourite;
 import com.example.book_web.entity.Response;
-import com.example.book_web.model.BookServices;
+import com.example.book_web.services.BookServices;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;

@@ -1,25 +1,35 @@
 package com.example.book_web.urlcontroler;
 
+import com.example.book_web.entity.BookFavourite;
 import com.example.book_web.entity.Response;
 import com.example.book_web.model.BookServices;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.server.PathParam;
+import java.util.ArrayList;
 
 @RestController
 public class BookServiceControlMapping {
-    BookServices book_services = new BookServices();
+    BookServices bookServices = new BookServices();
+
     @GetMapping(value = "/book/{id}")
     public Response showBookOrderBy(@PathVariable(value = "id") int id, @PathParam("orderBy") String orderBy, @PathParam("order") String order){
-
-        if(book_services.isValidCategory(id, book_services.getCategories())){
-            System.out.println("Request status: 200");
-            return book_services.getBookOrderBy(id, 200, orderBy, order);
+        /*If categoryId valid on database implement this logic and return response*/
+        if(bookServices.isValidCategory(id)){
+            return bookServices.getBookOrderBy(id, orderBy, order);
         }else {
-            System.out.println("Request failed!");
+            return new Response(-1, "Request failed!", null);
         }
-        return book_services.getBookOrderBy(id, -1, orderBy, order);
     }
+
+    @GetMapping(value = "/book/favourite/{userPhone}")
+    public ArrayList<BookFavourite> showFavourite(@PathVariable(value = "userPhone") String userPhone){
+        return bookServices.getFavoriteBook(userPhone);
+    }
+
+    @GetMapping (value = "/book/favourite/dislike/")
+    public void disLike(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") String bookId){
+        bookServices.disLikeBook(userPhone, bookId);
+    }
+
 }

@@ -4,6 +4,7 @@ import com.example.book_web.dbconnection.DBConnector;
 import com.example.book_web.entity.BookFavourite;
 import com.example.book_web.entity.Books;
 import com.example.book_web.entity.Response;
+import org.apache.tomcat.util.net.jsse.JSSEUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -38,27 +39,25 @@ public class BookServices {
     }
 
     //Method to check available category on database
-    public boolean isValidCategory(int category_id, HashMap<Integer, String> listCategories){
-        if(listCategories.get((Integer) category_id) == null){
-            System.out.println(category_id + " not exist!");
-            return false;
+    public boolean isValidCategory(int category_id){
+        String query = "SELECT * FROM `book`.`book_category` WHERE `category_id` = '" + category_id + "';";
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            if(resultSet.next() && resultSet.getInt("category_id") == category_id){
+                return true;
+            }
+        }catch (Exception exception){
+            exception.printStackTrace();
         }
-        return true;
+        return false;
     }
 
     //Method will be return a response contain list book order by book filed
-    public Response getBookOrderBy(int categoryId, int code, String orderBy, String order){
+    public Response getBookOrderBy(int categoryId, String orderBy, String order){
         ArrayList<Books> listBooks = new ArrayList<Books>();
-        Books book = new Books();
+        int code;
         String query, message = null;
-
-        /* If categoryID available after value code = 200
-        else if categoryID not exist value code = -1  */
-        if(code == 200){
-            message = "Success!";
-        }else {
-            return new Response(-1, "Request failed", null);
-        }
 
         /* If order is null or invalid order, order will be set default vale = ASC */
         if(order == null || ( !(order.equals("ASC")) && !(order.equals("DESC"))) ){
@@ -71,50 +70,80 @@ public class BookServices {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){
+                Books book = new Books();
                 book.setBookId(resultSet.getString("book_id"));
                 book.setBookTitle(resultSet.getString("book_title"));
-                book.setCategoryId(resultSet.getInt("categoryId"));
+                book.setCategoryId(resultSet.getInt("category_id"));
                 book.setLinkPhoto(resultSet.getString("link_photo"));
                 book.setReleaseYear((resultSet.getInt("release_year")));
                 book.setDescription(resultSet.getString("description"));
                 book.setAuthor(resultSet.getString("author"));
                 book.setPrice(resultSet.getLong("price"));
                 book.setAmount(resultSet.getInt("amount"));
+
                 listBooks.add(book);
             }
+            /* If categoryID available after value code = 200
+            else if categoryID not exist value code = -1  */
+            code = 200 ;
+            message = "Success!";
+            return new Response(code, message, listBooks);
         }catch (SQLException e){
             e.printStackTrace();
+            return new Response(-1, "Request failed", null);
         }
-        return new Response(code, message, listBooks);
     }
 
     //Method show user book favorite
-    public void getFavoriteBook(String userPhone){
-        ArrayList<Books> listFavoriteBook = new ArrayList<Books>();
+    public ArrayList<BookFavourite> getFavoriteBook(String userPhone){
+
         String query = null;
         try {
             Statement statement = connection.createStatement();
-            query = "SELECT " +
-                    "`book`.`book_storage`.`link_photo`, " +
-                    "`book`.`book_storage`.`book_title`, " +
-                    "`book`.`users`.`user_phone`, " +
-                    "`book`.`book_storage`.`release_year`, " +
-                    "`book`.`book_storage`.`price` " +
-                    " FROM " +
-                    "`book`.`book_favourite` " +
-                    "JOIN `book`.`book_storage` ON `book`.`book_favourite`.`book_id` = `book`.`book_storage`.`book_id` " +
-                    "JOIN `book`.`users` ON `book`.`book_favourite`.`user_phone` = `book`.`users`.`user_phone` " +
-                    "WHERE " +
-                    "`book`.`book_favourite`.`user_phone` = '" + userPhone + "';";
+            query = "SELECT `book`.`book_storage`.`link_photo`, `book`.`book_storage`.`book_title`, `book`.`book_post`.`user_phone`, `book`.`book_storage`.`release_year`, `book`.`book_storage`.`price`  \n" +
+                    "FROM `book`.`book_favourite` \n" +
+                    "JOIN `book`.`book_storage` ON `book`.`book_favourite`.`book_id` = `book`.`book_storage`.`book_id` \n" +
+                    "JOIN `book`.`book_post` ON `book`.`book_favourite`.`book_id` = `book`.`book_post`.`book_id` \n" +
+                    "WHERE `book`.`book_favourite`.`user_phone` = " + userPhone;
             System.out.println(query);
             ResultSet resultSet = statement.executeQuery(query);
-            if (resultSet.next()){
-                System.out.println("ok");
+            ArrayList<BookFavourite> listFavoriteBook = new ArrayList<BookFavourite>();
+            BookFavourite bookFavourite = new BookFavourite();
+            while (resultSet.next()){
+                bookFavourite.setBookTitle(resultSet.getString("book_title"));
+                bookFavourite.setLinkPhoto(resultSet.getString("link_photo"));
+                bookFavourite.setPhoneContact(resultSet.getString("user_phone"));
+                bookFavourite.setYearRelease(resultSet.getString("release_year"));
+                bookFavourite.setPrice(resultSet.getLong("price"));
+
+                listFavoriteBook.add(bookFavourite);
             }
+            return listFavoriteBook;
         }catch (SQLException exception){
             exception.printStackTrace();
+            return null;
         }
     }
+
+    //Method dislike book
+    public void disLikeBook(String userPhone, String bookId){
+        String query;
+        query = "DELETE FROM `book`.`book_favourite` WHERE (`user_phone` = '" + userPhone + "') and (`book_id` = '" + bookId + "');";
+        try {
+            Statement statement = connection.createStatement();
+            int flag = statement.executeUpdate(query);
+            if(flag > 0){
+                System.out.println("Dislike success!");
+            }else {
+                System.out.println("Dislike failed!");
+            }
+
+        }catch (SQLException exception){
+            exception.printStackTrace();
+
+        }
+    }
+
     //Method post new book
     public void postBook(Books book, String userPhone){
         boolean categoryExist;
@@ -141,35 +170,5 @@ public class BookServices {
         }catch (SQLException exception){
             exception.printStackTrace();
         }
-    }
-    //Method show book favorite
-    public ArrayList<BookFavourite> showFavoriteBook(String userPhone){
-        ArrayList<BookFavourite> listBookFavourite = new ArrayList<BookFavourite>();
-        BookFavourite bookFavourite = new BookFavourite();
-        String query;
-        //Build query
-        query = "SELECT book.book_favourite.book_id, book.book_storage.book_title, book.book_storage.release_year, book.users.user_phone, book.book_storage.price, book.book_storage.price, book.book_storage.link_photo " +
-                "FROM book.book_favourite " +
-                "INNER JOIN book.book_storage ON book.book_favourite.book_id = book.book_storage.book_id " +
-                "INNER JOIN book.book_post ON book.book_post.book_id = book.book_favourite.book_id " +
-                "INNER JOIN book.users ON book.users.user_phone = book.book_post.user_phone ;";
-        //Get data from database
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-            //Get detail favourite book one by one include( title book, link photo, contact, year release
-            while (resultSet.next()){
-                bookFavourite.setBookTitle(resultSet.getString("book_title"));
-                bookFavourite.setLinkPhoto(resultSet.getString("link_photo"));
-                bookFavourite.setPhoneContact(resultSet.getString("user_phone"));
-                bookFavourite.setYearRelease(resultSet.getString("release_year"));
-                bookFavourite.setPrice(resultSet.getLong("price"));
-                listBookFavourite.add(bookFavourite);
-            }
-            return listBookFavourite;
-        }catch (SQLException exception){
-            exception.printStackTrace();
-        }
-        return null;
     }
 }

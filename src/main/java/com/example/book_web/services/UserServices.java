@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.regex.Pattern;
 
 public class UserServices {
 
@@ -17,23 +18,15 @@ public class UserServices {
 
     //Method to check valid form register
     public boolean isValidRegister(Users user){
-        if(!user.getUserEmail().contains("@gmail.com")){
+
+        if(Pattern.matches("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@gmail.com", user.getUserEmail())){
             System.out.println(user.getUserEmail() + " invalid!");
             return false;
         }
-
-        if(user.getUserPhone().length() != 10){
+        if(Pattern.matches("[0][0-9]{9}", user.getUserPhone())){
             System.out.println("Format number phone must contains 10 digit");
             return false;
-        }else {
-            for(int i = 0; i < user.getUserPhone().length(); i++){
-                if(!Character.isDigit(user.getUserPhone().charAt(i))){
-                    System.out.println("Exist charter '" + user.getUserPhone().charAt(i) + "' in number phone!");
-                    return false;
-                }
-            }
         }
-
         if(user.userPassword.length() < 8){
             System.out.println("Password contains least 8 character");
             return false;

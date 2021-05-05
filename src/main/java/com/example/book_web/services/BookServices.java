@@ -95,7 +95,7 @@ public class BookServices {
 
     //Method show user book favorite
     public ArrayList<BookFavourite> getFavoriteBook(String userPhone){
-
+        ArrayList<BookFavourite> listFavoriteBook = new ArrayList<BookFavourite>();
         String query = null;
         try {
             Statement statement = connection.createStatement();
@@ -106,9 +106,8 @@ public class BookServices {
                     "WHERE `book`.`book_favourite`.`user_phone` = " + userPhone;
             System.out.println(query);
             ResultSet resultSet = statement.executeQuery(query);
-            ArrayList<BookFavourite> listFavoriteBook = new ArrayList<BookFavourite>();
-            BookFavourite bookFavourite = new BookFavourite();
             while (resultSet.next()){
+                BookFavourite bookFavourite = new BookFavourite();
                 bookFavourite.setBookTitle(resultSet.getString("book_title"));
                 bookFavourite.setLinkPhoto(resultSet.getString("link_photo"));
                 bookFavourite.setPhoneContact(resultSet.getString("user_phone"));

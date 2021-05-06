@@ -2,6 +2,7 @@ package com.example.book_web.services;
 
 import com.example.book_web.dbconnection.DBConnector;
 import com.example.book_web.entity.Users;
+import com.example.book_web.entity.changeForm.ChangeGmailForm;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
@@ -13,72 +14,110 @@ import java.util.regex.Pattern;
 public class UserServices {
 
     private final Connection connection;
+
     public UserServices(Connection connection) {
         this.connection = connection;
     }
 
-    //Method to check valid form register
-    public boolean isValidRegister(Users user){
-
-        if(Pattern.matches("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@gmail.com", user.getUserEmail())){
-            System.out.println(user.getUserEmail() + " invalid!");
+    //Method check valid gmail if gmail contain charters accept and true format if wrong return false if wrong return false
+    public boolean isValidGmail(String userGmail){
+        if(!Pattern.matches("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@gmail.com", userGmail)){
+            System.out.println(userGmail + " invalid!");
             return false;
         }
-        if(Pattern.matches("[0][0-9]{9}", user.getUserPhone())){
+        return true;
+    }
+    //Method check  check valid number phone if all charters number phone is digit, start with zero and contain enough 10 digit if wrong return false
+    public boolean isValidNumberPhone(String userPhone){
+        if(!Pattern.matches("[0][0-9]{9}", userPhone)){
             System.out.println("Format number phone must contains 10 digit");
             return false;
         }
-        if(user.userPassword.length() < 8){
+        return true;
+    }
+    //Method check valid password, password must contains lest 8 character if wrong return false
+    public boolean isValidPassword(String userPassword){
+        if(userPassword.length() < 8){
             System.out.println("Password contains least 8 character");
             return false;
         }
         return true;
     }
 
-    //Method to login
-    public void userLogin(String userPhone, String userPassword) throws SQLException {
-        Statement statement = connection.createStatement();
+    /* Method login will be return notification whether success or failed
+    after execute logic compere userPhone and userPassword with data on database */
+    public String userLogin(String userPhone, String userPassword){
         String query, phone = null, password = null;
-        query = "SELECT user_phone, user_password FROM book.users WHERE user_phone = '" + userPhone + "';";
-        ResultSet resultSet = statement.executeQuery(query);
-        if(resultSet.next()){
-            phone = resultSet.getString("userPhone");
-            password = resultSet.getString("userPassword");
-            if(!password.equals(userPassword)){
-                System.out.println("Incorrect password");
-                return;
+        try {
+            //Build statement to query password by userPhone
+            query = "SELECT user_phone, user_password FROM book.users WHERE user_phone = '" + userPhone + "';";
+            //Create statement
+            Statement statement = connection.createStatement();
+            //Create result set to receive userPhone and userPassword after execute query
+            ResultSet resultSet = statement.executeQuery(query);
+            /*If resultSet is not null make sure that account has register and next step is
+                Check if password provide by user whether correct:
+                    -   if password provide by user correct return message login success
+                    -   else return message login failed incorrect password
+             Else resultSet is null that mean account hasn't already register */
+            if(resultSet.next()){
+                //Receive userPhone
+                phone = resultSet.getString("user_phone");
+                //Receive userPassword
+                password = resultSet.getString("user_password");
+                //Logic check whether password is same with password on database
+                if(password.equals(userPassword)){
+                    return "Login Success!";
+                }
+            }else {
+                System.out.println("Account number phone: " + userPhone + " not exist! \nLogin filed!");
+                return "Incorrect password";
             }
-        }else {
-            System.out.println("Account number phone: " + userPhone + " not exist! \nLogin filed!");
-            return;
+        }catch (SQLException exception){
+            exception.printStackTrace();
+            return "Sever internal error, login failed!";
         }
-        System.out.println("Login Success!");
+       return "Account number phone: " + userPhone + " not exist! \nLogin filed!";
     }
 
-    //Method register user
-    public void userRegister(Users user) throws SQLException {
+    /*Method register require userPhone and userEmail has already not yet register before
+    and it will be return notification detail that whether register success or failed     */
+    public String userRegister(Users user){
         String query;
-        Statement statement = connection.createStatement();
-
-        query = "SELECT user_phone FROM book.users WHERE user_phone = '" + user.getUserPhone() +"';";
-        ResultSet resultSet = statement.executeQuery(query);
-        if(resultSet.next()){
-            System.out.println("Number phone has use by another account!");
-        }else {
+        try {
+            //Build query check whether number phone or email has used to register before?
+            query = "SELECT user_phone, user_email " +
+                    "FROM book.users WHERE user_phone = '" + user.getUserPhone() +
+                    "' OR user_email = '"+ user.getUserEmail() + "';";
+            //Create Statement
+            Statement statement = connection.createStatement();
+            //Create result set
+            ResultSet resultSet = statement.executeQuery(query);
+            /*If resultSet have any result it make sure that email or number phone has register before
+              and prevent insert duplicate data on database*/
+            if(resultSet.next()){
+                //If clause true return notification this number phone has register before
+                if(user.getUserPhone().equals(resultSet.getString("user_phone"))){
+                    return "Number phone: " + user.getUserPhone() +" has user by another account. Register Filed!";
+                }
+                //If clause true return notification this email has register before
+                if(user.getUserEmail().equals(resultSet.getString("user_email"))){
+                    return "Email: " + user.getUserEmail() +" has user by another account. Register Filed!";
+                }
+            }
+            //If after check and make sure that that number phone and email is unique, implement build query to insert data
             query = "INSERT INTO `book`.`users` (`user_phone`, `user_name`, `user_password`, `user_email`) VALUES " +
                     "('" + user.getUserPhone() + "','" +
                     user.getUserName() + "','" +
                     user.getUserPassword() + "','" +
                     user.getUserEmail() + "');";
-            try {
-                statement.executeUpdate(query);
-                System.out.println("Register success!");
-            }catch (SQLException e){
-                System.out.println("Gmail has use by another account!");
-                System.out.println(e.toString());
-                System.out.println("Register failed!");
-            }
+            //Execute query to insert data
+            statement.executeUpdate(query);
+        }catch (SQLException exception){
+            exception.printStackTrace();
+            return "Internal error, Register failed!";
         }
+        return "Register success!";
     }
 
     //Method will return all information of user
@@ -102,25 +141,56 @@ public class UserServices {
     }
 
     //Method to change user password
-    public void changePassword(String userPhone, String userPassword, String newPassword ){
-        String oldPassword = null, query;
+    public String changePassword(String userPhone, String userPassword, String newPassword ){
+        String query;
         try {
             Statement statement = connection.createStatement();
-            query = "SELECT `user_password` FROM `book`.`users` WHERE `user_phone` =  `" + userPhone + "';";
+            query = "SELECT `user_password` FROM `book`.`users` " +
+                    "WHERE `user_phone` =  '" + userPhone +
+                    "' AND `user_password` = '" + userPassword + "';";
+            System.out.println(query);
+            ResultSet resultSet = statement.executeQuery(query);
+            if(resultSet.next()) {
+                query = "UPDATE `book`.`users` SET `user_password` = '" + newPassword + "' WHERE (`user_phone` = '" + userPhone + "');";
+                statement.executeUpdate(query);
+                return "Change password success!";
+            }else {
+                return "Change password failed!";
+            }
+        }catch (SQLException exception){
+            exception.printStackTrace();
+            return "Internal error, Change password failed!";
+        }
+    }
+    //Method change user gmail
+    public String changeGmail(ChangeGmailForm gmailForm){
+        String query;
+        try {
+            query = "SELECT user_email FROM `book`.`users` " +
+                    "WHERE `user_phone` = '" + gmailForm.getUserPhone() + "' AND `user_password` = '" + gmailForm.getUserPassword() + "';";
+
+            Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             if(resultSet.next()){
-                oldPassword = resultSet.getString("user_password");
-            }
-            if(userPassword.equals(oldPassword)){
-                query = "UPDATE `book`.`users` SET `user_password` = '" + newPassword + "' WHERE (`user_phone` = '" +userPhone+ "');";
+
+                if(resultSet.getString("user_email").equals(gmailForm.getUserNewGmail())){
+                    return "Change gmail failed new gmail same old gmail";
+                }
+
+                query = "SELECT user_email FROM `book`.`users` WHERE  `user_email`= '" + gmailForm.getUserNewGmail() + "';";
+                resultSet = statement.executeQuery(query);
+                if(resultSet.next()){
+                    return "Gmail has been use by another account!";
+                }
+
+                query = "UPDATE `book`.`users` SET `user_email` = '"+ gmailForm.getUserNewGmail() +"' " +
+                        "WHERE (`user_phone` = '" + gmailForm.getUserPhone() + "');";
                 statement.executeUpdate(query);
-                System.out.println("Change password success!");
-            }else {
-                System.out.println("Change password failed!");
+                return "Change gmail success!";
             }
         }catch (SQLException exception){
             exception.printStackTrace();
         }
+        return "Change gmail failed!";
     }
-
 }

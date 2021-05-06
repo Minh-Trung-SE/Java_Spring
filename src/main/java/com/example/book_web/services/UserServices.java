@@ -2,18 +2,19 @@ package com.example.book_web.services;
 
 import com.example.book_web.dbconnection.DBConnector;
 import com.example.book_web.entity.Users;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.regex.Pattern;
-
+@Service
 public class UserServices {
 
-    Connection connection;
-    public UserServices() {
-        this.connection = DBConnector.getConnectionDB();
+    private final Connection connection;
+    public UserServices(Connection connection) {
+        this.connection = connection;
     }
 
     //Method to check valid form register
@@ -57,7 +58,7 @@ public class UserServices {
     //Method register user
     public void userRegister(Users user) throws SQLException {
         String query;
-        Statement statement = DBConnector.connection.createStatement();
+        Statement statement = connection.createStatement();
 
         query = "SELECT user_phone FROM book.users WHERE user_phone = '" + user.getUserPhone() +"';";
         ResultSet resultSet = statement.executeQuery(query);

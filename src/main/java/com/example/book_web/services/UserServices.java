@@ -1,8 +1,7 @@
 package com.example.book_web.services;
 
-import com.example.book_web.dbconnection.DBConnector;
 import com.example.book_web.entity.Users;
-import com.example.book_web.entity.changeForm.ChangeGmailForm;
+import com.example.book_web.entity.changeForm.ChangeEmailForm;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
@@ -68,10 +67,12 @@ public class UserServices {
                 //Logic check whether password is same with password on database
                 if(password.equals(userPassword)){
                     return "Login Success!";
+                }else {
+                    return "Incorrect password";
                 }
             }else {
                 System.out.println("Account number phone: " + userPhone + " not exist! \nLogin filed!");
-                return "Incorrect password";
+
             }
         }catch (SQLException exception){
             exception.printStackTrace();
@@ -162,29 +163,44 @@ public class UserServices {
             return "Internal error, Change password failed!";
         }
     }
-    //Method change user gmail
-    public String changeGmail(ChangeGmailForm gmailForm){
+
+    /*Method change user email after check and make sure that userPhone, userNewEmail true format
+        Step 1: Check user phone and password if both true then allow user change email
+                    if wrong exit method return notification failed!
+        Step 2: Must past step 1
+                -   Check whether new email same old email if same exit method this mean also change email failed
+                -   Continue to check whether new email provide by user already user by another account
+                        if not exit move step 3
+                        else exit method and notification that change email failed
+       Step 3: Execute query update data
+                        if success return notification success!
+                        else return notification failed!
+*/
+    public String changeGmail(ChangeEmailForm emailForm){
         String query;
         try {
+            //Build query to check password and number phone
             query = "SELECT user_email FROM `book`.`users` " +
-                    "WHERE `user_phone` = '" + gmailForm.getUserPhone() + "' AND `user_password` = '" + gmailForm.getUserPassword() + "';";
-
+                    "WHERE `user_phone` = '" + emailForm.getUserPhone() + "' AND `user_password` = '" + emailForm.getUserPassword() + "';";
+            //Create statement
             Statement statement = connection.createStatement();
+            //Create resultSet to check result if resultSet not null this mean allow move to step 2
             ResultSet resultSet = statement.executeQuery(query);
             if(resultSet.next()){
 
-                if(resultSet.getString("user_email").equals(gmailForm.getUserNewGmail())){
+                //Check whether new email it already same old email if same exit
+                if(resultSet.getString("user_email").equals(emailForm.getUserNewGmail())){
                     return "Change gmail failed new gmail same old gmail";
                 }
-
-                query = "SELECT user_email FROM `book`.`users` WHERE  `user_email`= '" + gmailForm.getUserNewGmail() + "';";
+                //Check whether email user by anther account
+                query = "SELECT user_email FROM `book`.`users` WHERE  `user_email`= '" + emailForm.getUserNewGmail() + "';";
                 resultSet = statement.executeQuery(query);
                 if(resultSet.next()){
                     return "Gmail has been use by another account!";
                 }
-
-                query = "UPDATE `book`.`users` SET `user_email` = '"+ gmailForm.getUserNewGmail() +"' " +
-                        "WHERE (`user_phone` = '" + gmailForm.getUserPhone() + "');";
+                //Build query update data
+                query = "UPDATE `book`.`users` SET `user_email` = '"+ emailForm.getUserNewGmail() +"' " +
+                        "WHERE (`user_phone` = '" + emailForm.getUserPhone() + "');";
                 statement.executeUpdate(query);
                 return "Change gmail success!";
             }

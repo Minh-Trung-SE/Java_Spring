@@ -1,6 +1,6 @@
 package com.example.book_web.urlcontroler;
 
-import com.example.book_web.entity.changeForm.ChangeGmailForm;
+import com.example.book_web.entity.changeForm.ChangeEmailForm;
 import com.example.book_web.entity.changeForm.ChangePasswordForm;
 import com.example.book_web.entity.Users;
 import com.example.book_web.services.UserServices;
@@ -57,7 +57,7 @@ public class UserControlMapping {
         return "Change password failed!";
     }
     @PostMapping (value = "/profile/change-gmail")
-    public String changeUserEmail(@RequestBody ChangeGmailForm gmailForm){
+    public String changeUserEmail(@RequestBody ChangeEmailForm gmailForm){
         if(userServices.isValidNumberPhone(gmailForm.getUserPhone()) && userServices.isValidGmail(gmailForm.getUserNewGmail())){
             return userServices.changeGmail(gmailForm);
         }else {

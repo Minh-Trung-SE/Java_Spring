@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 @Getter @Setter
 public class BookFavourite {
+    String bookId;
     String linkPhoto;
     String bookTitle;
     String yearRelease;

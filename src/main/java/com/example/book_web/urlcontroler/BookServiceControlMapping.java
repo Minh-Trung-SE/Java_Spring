@@ -28,13 +28,19 @@ public class BookServiceControlMapping {
     }
 
     @GetMapping(value = "/book/favourite/{userPhone}")
-    public ArrayList<BookFavourite> showFavourite(@PathVariable(value = "userPhone") String userPhone){
-        return bookServices.getFavoriteBook(userPhone);
+    public ArrayList<BookFavourite> showFavourite(@PathVariable(value = "userPhone") String userPhone, @RequestParam(value = "orderBy", defaultValue = "book_title") String orderBy, @RequestParam(value = "order", defaultValue = "ASC") String order){
+        System.out.println("OK");
+        return bookServices.getFavoriteBook(userPhone, orderBy, order);
     }
 
-    @GetMapping (value = "/book/favourite/dislike/")
-    public void disLike(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") String bookId){
-        bookServices.disLikeBook(userPhone, bookId);
+    @GetMapping (value = "/book/dis-favourite/")
+    public String disLike(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") String bookId){
+        return bookServices.disLikeBook(userPhone, bookId);
+    }
+
+    @GetMapping (value = "/book/add-favourite/")
+    public String like(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") String bookId){
+        return bookServices.addLikeBook(userPhone, bookId);
     }
 
 }

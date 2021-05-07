@@ -77,8 +77,8 @@ public class BookServices {
             order = "ASC";
         }
         //Build query
-        query= "SELECT * FROM `book`.`book_storage` WHERE `category_id` = '" + categoryId +"' ORDER BY " + "'" + orderBy + "' " + order + ";";
-
+        query= "SELECT * FROM `book`.`book_storage` WHERE `category_id` = '" + categoryId +"' ORDER BY " + orderBy + " " + order + ";";
+        System.out.println(query);
         /*Block code will return list book order by filed book from database*/
         try {
             //Create statement
@@ -113,23 +113,27 @@ public class BookServices {
     }
 
     //Method show user book favorite
-    public ArrayList<BookFavourite> getFavoriteBook(String userPhone){
+    public ArrayList<BookFavourite> getFavoriteBook(String userPhone, String orderBy, String order){
         ArrayList<BookFavourite> listFavoriteBook = new ArrayList<>();
         String query;
+        /* If order invalid order, order will be set default vale = ASC */
+        if( !(order.equals("ASC")) && !(order.equals("DESC")) ){
+            order = "ASC";
+        }
         try {
             //Build query
-            query = "SELECT `book`.`book_storage`.`link_photo`, `book`.`book_storage`.`book_title`, `book`.`book_post`.`user_phone`, `book`.`book_storage`.`release_year`, `book`.`book_storage`.`price`  \n" +
+            query = "SELECT `book`.`book_storage`.`link_photo`, `book`.`book_storage`.`book_id`, `book`.`book_storage`.`book_title`, `book`.`book_post`.`user_phone`, `book`.`book_storage`.`release_year`, `book`.`book_storage`.`price`  \n" +
                     "FROM `book`.`book_favourite` \n" +
                     "JOIN `book`.`book_storage` ON `book`.`book_favourite`.`book_id` = `book`.`book_storage`.`book_id` \n" +
                     "JOIN `book`.`book_post` ON `book`.`book_favourite`.`book_id` = `book`.`book_post`.`book_id` \n" +
-                    "WHERE `book`.`book_favourite`.`user_phone` = " + userPhone;
-            System.out.println(query);
+                    "WHERE `book`.`book_favourite`.`user_phone` = " + userPhone + " ORDER BY " + orderBy + " " + order;
             //Create statement
             Statement statement = connection.createStatement();
             //Create result set to receive
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){
                 BookFavourite bookFavourite = new BookFavourite();
+                bookFavourite.setBookId(resultSet.getString("book_id"));
                 bookFavourite.setBookTitle(resultSet.getString("book_title"));
                 bookFavourite.setLinkPhoto(resultSet.getString("link_photo"));
                 bookFavourite.setPhoneContact(resultSet.getString("user_phone"));
@@ -145,24 +149,43 @@ public class BookServices {
     }
 
     //Method dislike book
-    public void disLikeBook(String userPhone, String bookId){
+    public String disLikeBook(String userPhone, String bookId){
         String query;
         query = "DELETE FROM `book`.`book_favourite` WHERE (`user_phone` = '" + userPhone + "') and (`book_id` = '" + bookId + "');";
         try {
             Statement statement = connection.createStatement();
-            int flag = statement.executeUpdate(query);
-            if(flag > 0){
-                System.out.println("Dislike success!");
-            }else {
-                System.out.println("Dislike failed!");
+            if(statement.executeUpdate(query) == 1){
+                return "Dislike success!";
             }
-
         }catch (SQLException exception){
             exception.printStackTrace();
-
+            return  "Server internal error. Dislike failed!";
         }
+        return  "Dislike failed!";
     }
 
+    //Method add like book
+    public String addLikeBook(String userPhone, String bookId){
+        String query;
+
+        try {
+            Statement statement = connection.createStatement();
+            query = "SELECT book_id FROM `book`.`book_favourite` WHERE book_id = '" + bookId + "' AND user_phone = '" + userPhone + "';";
+            ResultSet resultSet = statement.executeQuery(query);
+            if (resultSet.next()){
+                return "Duplicate data. Add failed!";
+            }else {
+                query = "INSERT INTO `book`.`book_favourite` (`user_phone`, `book_id`) VALUES ('" + userPhone + "', '" + bookId + "');";
+                if(statement.executeUpdate(query) == 1){
+                    return "Add success!";
+                }
+            }
+        }catch (SQLException exception){
+            exception.printStackTrace();
+            return  "Server internal error. Add failed!";
+        }
+        return  "Add failed!";
+    }
     //Method post new book
     public void postBook(Books book, String userPhone){
         boolean categoryExist;

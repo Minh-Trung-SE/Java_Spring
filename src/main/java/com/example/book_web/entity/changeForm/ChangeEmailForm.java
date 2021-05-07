@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChangeGmailForm {
+public class ChangeEmailForm {
     public String userPhone;
     public String userPassword;
     public String userNewGmail;

@@ -1,9 +1,10 @@
 package com.example.book_web.services;
 
 import com.example.book_web.entity.BookFavourite;
-import com.example.book_web.entity.BookPosted;
+import com.example.book_web.entityForm.BookPosted;
 import com.example.book_web.entity.Books;
-import com.example.book_web.entity.Response;
+import com.example.book_web.entityForm.PostBookForm;
+import com.example.book_web.entityForm.Response;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
@@ -78,7 +79,6 @@ public class BookServices {
         }
         //Build query
         query= "SELECT * FROM `book`.`book_storage` WHERE `category_id` = '" + categoryId +"' ORDER BY " + orderBy + " " + order + ";";
-        System.out.println(query);
         /*Block code will return list book order by filed book from database*/
         try {
             //Create statement
@@ -187,32 +187,40 @@ public class BookServices {
         return  "Add failed!";
     }
     //Method post new book
-    public void postBook(Books book, String userPhone){
+    public String postBook(PostBookForm bookForm){
         boolean categoryExist;
         String query;
         try{
             Statement statement = connection.createStatement();
-            //Insert book to table "book_storage"
-            query = "INSERT INTO `book`.`book_storage` (`book_id`, `book_title`, `category_id`, `link_photo`, `release_year`, `description`, `author`, `price`, `amount`) " +
-                    "VALUES ('" + book.getBookId()+"', '" +
-                     book.getBookTitle() +" '," +
-                    " '" + book.getCategoryId() + "', " +
-                    "'" + book.getLinkPhoto() + "'," +
-                    " '" + book.getReleaseYear() + "'," +
-                    " '" + book.getDescription() + "'," +
-                    " '" + book.getAuthor() + "'," +
-                    " '" + book.getPrice() + "'," +
-                    " '" + book.getAmount() + "');\n";
-            statement.executeUpdate(query);
-            //Insert information about user post book to table "book_post"
-            query = "INSERT INTO `book`.`book_post` (`user_phone`, `book_id`) " +
-                    "VALUES ('" + userPhone + "', '" + book.getBookId() + "');";
-            statement.executeUpdate(query);
-            System.out.println("Posted book success!");
+            for(int i = 0; i < bookForm.listPostBook.size(); i++){
+
+                //Insert book to table "book_storage"
+                query = "INSERT IGNORE INTO `book`.`book_storage` (`book_id`, `book_title`, `category_id`, `link_photo`, `release_year`, `description`, `author`, `price`, `amount`) \n" +
+                        "VALUES ('" + bookForm.listPostBook.get(i).getBookId() +"', '" +
+                        bookForm.listPostBook.get(i).getBookTitle() + " '," +
+                        " '" + bookForm.listPostBook.get(i).getCategoryId() + "', " +
+                        "'" + bookForm.listPostBook.get(i).getLinkPhoto() + "'," +
+                        " '" + bookForm.listPostBook.get(i).getReleaseYear() + "'," +
+                        " '" + bookForm.listPostBook.get(i).getDescription() + "'," +
+                        " '" + bookForm.listPostBook.get(i).getAuthor() + "'," +
+                        " '" + bookForm.listPostBook.get(i).getPrice() + "'," +
+                        " '" + bookForm.listPostBook.get(i).getAmount() + "');\n";
+                System.out.println(query);
+                statement.executeUpdate(query);
+
+                //Insert information about user post book to table "book_post"
+                query = "INSERT IGNORE INTO `book`.`book_post` (`user_phone`, `book_id`) " +
+                        "VALUES ('" + bookForm.getUserPhone() + "', '" + bookForm.listPostBook.get(i).getBookId() + "');";
+                System.out.println(query);
+                statement.executeUpdate(query);
+            }
         }catch (SQLException exception){
             exception.printStackTrace();
+            return "Post book failed!";
         }
+        return "Update success!";
     }
+
 
     //Method show post book
     public ArrayList<BookPosted> showBookPosted(String userPhone){

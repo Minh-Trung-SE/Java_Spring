@@ -1,7 +1,7 @@
 package com.example.book_web.urlcontroler;
 
-import com.example.book_web.entity.changeForm.ChangeEmailForm;
-import com.example.book_web.entity.changeForm.ChangePasswordForm;
+import com.example.book_web.entityForm.ChangeEmailForm;
+import com.example.book_web.entityForm.ChangePasswordForm;
 import com.example.book_web.entity.Users;
 import com.example.book_web.services.UserServices;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +16,12 @@ public class UserControlMapping {
         this.userServices = userServices;
     }
 
-    @PostMapping(value = "/login")
+    @PostMapping(value = "/user/login")
     public String Login(@RequestBody Users user) {
         return userServices.userLogin(user.getUserPhone(), user.getUserPassword());
     }
 
-    @PostMapping(value = "/register")
+    @PostMapping(value = "/user/register")
     public String Register(@RequestBody Users user) throws SQLException {
         if(!userServices.isValidNumberPhone(user.getUserPhone())){
             return "Number phone: " + user.getUserPhone() + " wrong format. Register failed!";
@@ -35,7 +35,7 @@ public class UserControlMapping {
         return userServices.userRegister(user);
     }
 
-    @GetMapping(value = "/profile/{userPhone}")
+    @GetMapping(value = "/user/profile/{userPhone}")
     public Users showProfile(@PathVariable(value = "userPhone") String userPhone){
         System.out.println(userPhone);
         if(userServices.isValidNumberPhone(userPhone)){
@@ -45,7 +45,7 @@ public class UserControlMapping {
         }
     }
 
-    @PostMapping (value = "/profile/change-password")
+    @PostMapping (value = "/user/profile/change-password")
     public String changeUserPassword(@RequestBody ChangePasswordForm passwordForm){
         if(userServices.isValidNumberPhone(passwordForm.getUserPhone())){
             if (userServices.isValidPassword(passwordForm.getUserPassword()) && userServices.isValidPassword(passwordForm.getUserNewPassword())){
@@ -56,7 +56,7 @@ public class UserControlMapping {
         }
         return "Change password failed!";
     }
-    @PostMapping (value = "/profile/change-gmail")
+    @PostMapping (value = "/user/profile/change-gmail")
     public String changeUserEmail(@RequestBody ChangeEmailForm gmailForm){
         if(userServices.isValidNumberPhone(gmailForm.getUserPhone()) && userServices.isValidGmail(gmailForm.getUserNewGmail())){
             return userServices.changeGmail(gmailForm);

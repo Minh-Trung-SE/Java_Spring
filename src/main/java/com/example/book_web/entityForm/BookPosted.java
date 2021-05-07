@@ -1,4 +1,4 @@
-package com.example.book_web.entity;
+package com.example.book_web.entityForm;
 
 import lombok.Getter;
 import lombok.Setter;

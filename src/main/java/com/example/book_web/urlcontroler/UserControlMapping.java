@@ -1,7 +1,7 @@
 package com.example.book_web.urlcontroler;
 
-import com.example.book_web.entityForm.ChangeEmailForm;
-import com.example.book_web.entityForm.ChangePasswordForm;
+import com.example.book_web.urlcontroler.requestModel.ChangeEmailForm;
+import com.example.book_web.urlcontroler.requestModel.ChangePasswordForm;
 import com.example.book_web.entity.Users;
 import com.example.book_web.services.UserServices;
 import org.springframework.web.bind.annotation.*;

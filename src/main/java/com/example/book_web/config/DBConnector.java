@@ -1,4 +1,4 @@
-package com.example.book_web.dbconnection;
+package com.example.book_web.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

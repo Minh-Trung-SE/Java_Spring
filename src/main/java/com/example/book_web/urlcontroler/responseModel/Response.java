@@ -1,4 +1,4 @@
-package com.example.book_web.entityForm;
+package com.example.book_web.urlcontroler.responseModel;
 
 import com.example.book_web.entity.Books;
 import lombok.Getter;

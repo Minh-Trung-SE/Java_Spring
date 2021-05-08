@@ -1,10 +1,10 @@
 package com.example.book_web.services;
 
 import com.example.book_web.entity.BookFavourite;
-import com.example.book_web.entityForm.BookPosted;
+import com.example.book_web.urlcontroler.requestModel.BookPosted;
 import com.example.book_web.entity.Books;
-import com.example.book_web.entityForm.PostBookForm;
-import com.example.book_web.entityForm.Response;
+import com.example.book_web.urlcontroler.requestModel.PostBookForm;
+import com.example.book_web.urlcontroler.responseModel.Response;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;

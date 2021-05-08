@@ -1,7 +1,7 @@
 package com.example.book_web.services;
 
 import com.example.book_web.entity.Users;
-import com.example.book_web.entityForm.ChangeEmailForm;
+import com.example.book_web.urlcontroler.requestModel.ChangeEmailForm;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;

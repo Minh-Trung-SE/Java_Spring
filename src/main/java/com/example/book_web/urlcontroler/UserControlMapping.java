@@ -4,6 +4,7 @@ import com.example.book_web.urlcontroler.requestModel.ChangeEmailForm;
 import com.example.book_web.urlcontroler.requestModel.ChangePasswordForm;
 import com.example.book_web.entity.Users;
 import com.example.book_web.services.UserServices;
+import com.example.book_web.urlcontroler.responseModel.ResponseUserProfile;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
@@ -35,11 +36,10 @@ public class UserControlMapping {
         return userServices.userRegister(user);
     }
 
-    @GetMapping(value = "/user/profile/{userPhone}")
-    public Users showProfile(@PathVariable(value = "userPhone") String userPhone){
-        System.out.println(userPhone);
+    @GetMapping(value = "/user/profile")
+    public ResponseUserProfile showProfile(@RequestParam(value = "userPhone") String userPhone){
         if(userServices.isValidNumberPhone(userPhone)){
-           return userServices.getInformationUser(userPhone);
+           return userServices.geProfileUser(userPhone);
         }else {
             return null;
         }

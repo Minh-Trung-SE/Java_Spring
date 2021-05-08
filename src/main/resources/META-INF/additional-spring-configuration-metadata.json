@@ -4,10 +4,5 @@
       "name": "database.DB_URL",
       "type": "java.lang.String",
       "description": "Description for database.DB_URL."
-    },
-    {
-      "name": "database.DB_URL",
-      "type": "java.lang.String",
-      "description": "Description for database.DB_URL."
     }
   ] }

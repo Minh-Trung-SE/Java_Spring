@@ -7,12 +7,12 @@ import lombok.Setter;
 import java.util.ArrayList;
 
 @Setter @Getter
-public class Response {
+public class ResponseListBookOrderByCategory {
     public int code;
     public String message;
     public ArrayList<Books> data;
 
-    public Response(int code, String message, ArrayList<Books> data) {
+    public ResponseListBookOrderByCategory(int code, String message, ArrayList<Books> data) {
         this.code = code;
         this.message = message;
         this.data = data;

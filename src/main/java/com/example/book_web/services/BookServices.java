@@ -1,10 +1,10 @@
 package com.example.book_web.services;
 
-import com.example.book_web.entity.BookFavourite;
-import com.example.book_web.urlcontroler.requestModel.BookPosted;
+import com.example.book_web.urlcontroler.responseModel.ResponseListBookFavourite;
+import com.example.book_web.urlcontroler.responseModel.ResponseListBookPosted;
 import com.example.book_web.entity.Books;
 import com.example.book_web.urlcontroler.requestModel.PostBookForm;
-import com.example.book_web.urlcontroler.responseModel.Response;
+import com.example.book_web.urlcontroler.responseModel.ResponseListBookOrderByCategory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
@@ -65,7 +65,7 @@ public class BookServices {
     }
 
     //Method will be return a response contain list book order by book filed
-    public Response getBookOrderBy(int categoryId, String orderBy, String order){
+    public ResponseListBookOrderByCategory getBookOrderBy(int categoryId, String orderBy, String order){
         //Initialize arraylist to save object book
         ArrayList<Books> listBooks = new ArrayList<>();
         //Initialize variable code to return code status when execute request
@@ -105,16 +105,16 @@ public class BookServices {
             else if categoryID not exist value code = -1  */
             code = 200 ;
             message = "Success!";
-            return new Response(code, message, listBooks);
+            return new ResponseListBookOrderByCategory(code, message, listBooks);
         }catch (SQLException e){
             e.printStackTrace();
         }
-        return new Response(-1, "Request failed", null);
+        return new ResponseListBookOrderByCategory(-1, "Request failed", null);
     }
 
     //Method show user book favorite
-    public ArrayList<BookFavourite> getFavoriteBook(String userPhone, String orderBy, String order){
-        ArrayList<BookFavourite> listFavoriteBook = new ArrayList<>();
+    public ArrayList<ResponseListBookFavourite> getFavoriteBook(String userPhone, String orderBy, String order){
+        ArrayList<ResponseListBookFavourite> listFavoriteBook = new ArrayList<>();
         String query;
         /* If order invalid order, order will be set default vale = ASC */
         if( !(order.equals("ASC")) && !(order.equals("DESC")) ){
@@ -132,14 +132,14 @@ public class BookServices {
             //Create result set to receive
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){
-                BookFavourite bookFavourite = new BookFavourite();
-                bookFavourite.setBookId(resultSet.getString("book_id"));
-                bookFavourite.setBookTitle(resultSet.getString("book_title"));
-                bookFavourite.setLinkPhoto(resultSet.getString("link_photo"));
-                bookFavourite.setPhoneContact(resultSet.getString("user_phone"));
-                bookFavourite.setYearRelease(resultSet.getString("release_year"));
-                bookFavourite.setPrice(resultSet.getLong("price"));
-                listFavoriteBook.add(bookFavourite);
+                ResponseListBookFavourite responseListBookFavourite = new ResponseListBookFavourite();
+                responseListBookFavourite.setBookId(resultSet.getInt("book_id"));
+                responseListBookFavourite.setBookTitle(resultSet.getString("book_title"));
+                responseListBookFavourite.setLinkPhoto(resultSet.getString("link_photo"));
+                responseListBookFavourite.setPhoneContact(resultSet.getString("user_phone"));
+                responseListBookFavourite.setYearRelease(resultSet.getString("release_year"));
+                responseListBookFavourite.setPrice(resultSet.getLong("price"));
+                listFavoriteBook.add(responseListBookFavourite);
             }
             return listFavoriteBook;
         }catch (SQLException exception){
@@ -148,8 +148,8 @@ public class BookServices {
         }
     }
 
-    //Method dislike book
-    public String disLikeBook(String userPhone, String bookId){
+    //Method disfavoured book
+    public String disFavouriteBook(String userPhone, String bookId){
         String query;
         query = "DELETE FROM `book`.`book_favourite` WHERE (`user_phone` = '" + userPhone + "') and (`book_id` = '" + bookId + "');";
         try {
@@ -164,8 +164,8 @@ public class BookServices {
         return  "Dislike failed!";
     }
 
-    //Method add like book
-    public String addLikeBook(String userPhone, String bookId){
+    //Method add favoured book
+    public String addFavouriteBook(String userPhone, String bookId){
         String query;
 
         try {
@@ -205,13 +205,11 @@ public class BookServices {
                         " '" + bookForm.listPostBook.get(i).getAuthor() + "'," +
                         " '" + bookForm.listPostBook.get(i).getPrice() + "'," +
                         " '" + bookForm.listPostBook.get(i).getAmount() + "');\n";
-                System.out.println(query);
                 statement.executeUpdate(query);
 
                 //Insert information about user post book to table "book_post"
                 query = "INSERT IGNORE INTO `book`.`book_post` (`user_phone`, `book_id`) " +
                         "VALUES ('" + bookForm.getUserPhone() + "', '" + bookForm.listPostBook.get(i).getBookId() + "');";
-                System.out.println(query);
                 statement.executeUpdate(query);
             }
         }catch (SQLException exception){
@@ -221,30 +219,29 @@ public class BookServices {
         return "Update success!";
     }
 
-
     //Method show post book
-    public ArrayList<BookPosted> showBookPosted(String userPhone){
+    public ArrayList<ResponseListBookPosted> showBookPosted(String userPhone, String orderBy ,String order){
         String query;
-        ArrayList<BookPosted>  bookPosts = new ArrayList<>();
+        ArrayList<ResponseListBookPosted>  listBookPosted = new ArrayList<>();
         try {
             Statement statement = connection.createStatement();
-            query = "SELECT `date`, `link_photo`, `book_title`, `price`, `release_year` FROM `book`.book_post\n" +
+            query = "SELECT `date_post`, `link_photo`, `book_title`, `price`, `release_year` FROM `book`.book_post\n" +
                     "LEFT JOIN `book`.`book_storage` ON book_storage.book_id = book_post.book_id\n" +
-                    "WHERE book_post.user_phone = " + userPhone + ";";
+                    "WHERE book_post.user_phone = " + userPhone + " ORDER BY " + orderBy + " " + order +";";
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){
-                BookPosted bookPosted = new BookPosted();
-                bookPosted.setTimePosted(resultSet.getTimestamp("date"));
+                ResponseListBookPosted bookPosted = new ResponseListBookPosted();
+                bookPosted.setTimePosted(resultSet.getTimestamp("date_post"));
                 bookPosted.setBookTitle(resultSet.getString("book_title"));
                 bookPosted.setPrice(resultSet.getLong("price"));
                 bookPosted.setLinkPhoto(resultSet.getString("link_photo"));
                 bookPosted.setReleaseYear(resultSet.getString("release_year"));
-                bookPosts.add(bookPosted);
+                listBookPosted.add(bookPosted);
             }
         }catch(SQLException exception){
             exception.printStackTrace();
         }
-        return bookPosts;
+        return listBookPosted;
     }
 
     //Method edit posted book

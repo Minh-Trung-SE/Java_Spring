@@ -2,6 +2,7 @@ package com.example.book_web.services;
 
 import com.example.book_web.entity.Users;
 import com.example.book_web.urlcontroler.requestModel.ChangeEmailForm;
+import com.example.book_web.urlcontroler.responseModel.ResponseUserProfile;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
@@ -122,23 +123,20 @@ public class UserServices {
     }
 
     //Method will return all information of user
-    public Users getInformationUser(String userPhone){
-        String query;
-        Users user = new Users();
+    public ResponseUserProfile geProfileUser(String userPhone){
+        String query, userName = null, userEmail = null;
         try {
             Statement statement = connection.createStatement();
             query = "SELECT * FROM `book`.`users` WHERE user_phone = '" + userPhone + "';";
             ResultSet resultSet = statement.executeQuery(query);
             if(resultSet.next()){
-                user.setUserPhone(resultSet.getString("user_phone"));
-                user.setUserEmail(resultSet.getString("user_email"));
-                user.setUserName(resultSet.getString("user_name"));
-                user.setUserPassword(resultSet.getString("user_password"));
+                userEmail = resultSet.getString("user_email");
+                userName = resultSet.getString("user_name");
             }
         }catch (SQLException exception){
             exception.printStackTrace();
         }
-        return user;
+        return new ResponseUserProfile(userPhone, userName, userEmail);
     }
 
     //Method to change user password

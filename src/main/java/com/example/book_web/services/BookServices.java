@@ -1,5 +1,8 @@
 package com.example.book_web.services;
 
+import com.example.book_web.entity.BookCategories;
+import com.example.book_web.repository.BookCategoryRepository;
+import com.example.book_web.repository.BookRepository;
 import com.example.book_web.urlcontroler.responseModel.ResponseListBookFavourite;
 import com.example.book_web.urlcontroler.responseModel.ResponseListBookPosted;
 import com.example.book_web.entity.Books;
@@ -12,49 +15,34 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 @Service
 public class BookServices {
     /*Injection object connection using constructor injection*/
     private final Connection connection;
-    public BookServices(Connection connection) {
+    private final BookRepository bookRepository;
+    private final BookCategoryRepository bookCategoryRepository;
+    public BookServices(Connection connection, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository) {
         this.connection = connection;
+        this.bookRepository = bookRepository;
+        this.bookCategoryRepository = bookCategoryRepository;
     }
 
     //Method purpose to get list book categories
-    public HashMap<Integer, String> getCategories(){
+    public ArrayList<BookCategories> getCategories(){
         //Initialize the array to get list book categories
-        HashMap<Integer, String> listCategories = new HashMap<>();
-        //Initialize string query
-        String query = "SELECT * FROM `book`.`book_category`;";
-        //Get list book categories from database
+        ArrayList<BookCategories> listCategories = new ArrayList<>();
         try{
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-            while (resultSet.next()){
-                //add key and value each object to hash map
-                listCategories.put(resultSet.getInt("category_id"), resultSet.getString("category_name"));
-            }
-        }catch (SQLException e){
+              listCategories = (ArrayList<BookCategories>) bookCategoryRepository.findAll();
+        }catch (Exception e){
             e.printStackTrace();
         }
-        //Return hash map contains list key = categoryId and value = description categories
         return listCategories;
     }
 
     //Method to check available category on database
     public boolean isValidCategory(int category_id){
-        //Initialize string query
-        String query;
         try {
-            //Build query
-            query = "SELECT * FROM `book`.`book_category` WHERE `category_id` = '" + category_id + "';";
-            //Create statement
-            Statement statement = connection.createStatement();
-            //Crete result set to receive result after execute query
-            ResultSet resultSet = statement.executeQuery(query);
-            if(resultSet.next()){
-                //If resultSet after execute query have lest one result return true, this mean category available
+            if(bookCategoryRepository.findBookCategoriesByCategoryId(category_id) != null){
                 return true;
             }
         }catch (Exception exception){
@@ -68,48 +56,16 @@ public class BookServices {
     public ResponseListBookOrderByCategory getBookOrderBy(int categoryId, String orderBy, String order){
         //Initialize arraylist to save object book
         ArrayList<Books> listBooks = new ArrayList<>();
-        //Initialize variable code to return code status when execute request
         int code;
-        //Initialize string message to return status when execute request
-        String query, message;
-
-        /* If order invalid order, order will be set default vale = ASC */
-        if( !(order.equals("ASC")) && !(order.equals("DESC")) ){
-            order = "ASC";
-        }
-        //Build query
-        query= "SELECT * FROM `book`.`book_storage` WHERE `category_id` = '" + categoryId +"' ORDER BY " + orderBy + " " + order + ";";
-        /*Block code will return list book order by filed book from database*/
-        try {
-            //Create statement
-            Statement statement = connection.createStatement();
-            //Create result set to receive list book after execute query on data base
-            ResultSet resultSet = statement.executeQuery(query);
-            while (resultSet.next()){
-                //Create distinct object with datatype is book for each book
-                Books book = new Books();
-                //Set attribute for each book
-                book.setBookId(resultSet.getString("book_id"));
-                book.setBookTitle(resultSet.getString("book_title"));
-                book.setCategoryId(resultSet.getInt("category_id"));
-                book.setLinkPhoto(resultSet.getString("link_photo"));
-                book.setReleaseYear((resultSet.getInt("release_year")));
-                book.setDescription(resultSet.getString("description"));
-                book.setAuthor(resultSet.getString("author"));
-                book.setPrice(resultSet.getLong("price"));
-                book.setAmount(resultSet.getInt("amount"));
-                //Add object book to list book
-                listBooks.add(book);
-            }
-            /* If categoryID available after value code = 200
-            else if categoryID not exist value code = -1  */
+        String message;
+        if(isValidCategory(categoryId)){
+            listBooks = bookRepository.findAllByCategoryId(categoryId);
             code = 200 ;
             message = "Success!";
             return new ResponseListBookOrderByCategory(code, message, listBooks);
-        }catch (SQLException e){
-            e.printStackTrace();
+        }else {
+            return new ResponseListBookOrderByCategory(-1, "Request failed", null);
         }
-        return new ResponseListBookOrderByCategory(-1, "Request failed", null);
     }
 
     //Method show user book favorite

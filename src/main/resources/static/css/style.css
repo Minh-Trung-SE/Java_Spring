@@ -1,0 +1,131 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/*Style box register and logi*/
+.form-box {
+    width: 380px;
+    height: 480px;
+    position: relative;
+    top: 10%;
+    left: 70%;
+    background-color: rgba(255, 255, 255, 0.603);
+    padding: 5px;
+    border: 1px solid #777;
+    border-radius: 6px;
+    overflow: hidden;
+    animation-name: form_box;
+    animation-duration: 1s;
+}
+
+@keyframes form_box{
+    0%{left: 100%;}
+    20%{left: 100%;}
+    100%{left: 70%;}
+}
+
+.button-box {
+    max-width: 240px;
+    margin: 35px auto;
+    display: flex;
+    background-color: rgba(78, 76, 76, 0.555);
+    position: relative;
+    box-shadow: 0 0 20px 9px #ff61241f;
+    border-radius: 30px;
+}
+.toggle-btn {
+    flex-grow: 1;
+    padding: 10px 30px;
+    cursor: pointer;
+    font-size: 16px;
+    background: transparent;
+    border: 0;
+    color: rgb(255, 241, 241);
+    font-weight: 550;
+    outline: none;
+    position: relative;
+}
+
+#btn {
+    top: 0;
+    left: 0;
+    position: absolute;
+    width: 128px;
+    height: 100%;
+    background: linear-gradient(to right, #ff105f, #ffad06);
+    border-radius: 30px;
+    transition: .5s;
+}
+
+.soical-icons {
+    margin: 30px auto;
+    text-align: center;
+}
+
+.soical-icons .fa {
+    font-size: 40px;
+    color: #1d4eef;
+    margin: 0 12px;
+    cursor: pointer;
+}
+
+.input-group {
+    top: 180px;
+    position: absolute;
+    width: 280px;
+    transition: 0.5s;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px 0;
+    margin: 5px 0;
+    border-left: 0;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 1px solid #999;
+    outline: none;
+    background: transparent;
+}
+
+.check-box {
+    margin: 30px 10px 30px 0;
+}
+
+.submit-btn {
+    width: 85%;
+    padding: 10px 30px;
+    color: #FFF;
+    font-size: 20px;
+    cursor: pointer;
+    display: block;
+    margin:  auto;
+    background: linear-gradient(to right, #ff105f, #ffad06);
+    border-radius: 30px;
+}
+
+.check-box > span {
+    color: #777;
+    font-size: 12px;
+    bottom: 68px;
+    position: absolute;
+}
+
+#login {
+    left: 50px;
+}
+
+#register {
+    left: 450px;
+}
+
+#Home {
+    height: 730px;
+    overflow: hidden;
+    width: 100%;
+    background-image: url("img/Book.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+}

@@ -32,13 +32,13 @@ public class BookServiceControlMapping {
         return bookServices.getFavoriteBook(userPhone, orderBy, order);
     }
 
-    @GetMapping (value = "/book/dis-favourite")
-    public String disLike(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") String bookId){
+    @DeleteMapping (value = "/book/dis-favourite")
+    public String disLike(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") Integer bookId){
         return bookServices.disFavouriteBook(userPhone, bookId);
     }
 
     @GetMapping (value = "/book/add-favourite")
-    public String like(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") String bookId){
+    public String like(@RequestParam(name = "userPhone") String userPhone, @RequestParam(name = "bookId") int bookId){
         return bookServices.addFavouriteBook(userPhone, bookId);
     }
 

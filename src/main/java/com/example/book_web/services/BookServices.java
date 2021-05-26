@@ -1,7 +1,10 @@
 package com.example.book_web.services;
 
 import com.example.book_web.entity.BookCategories;
+import com.example.book_web.entity.BookPost;
 import com.example.book_web.repository.BookCategoryRepository;
+import com.example.book_web.repository.BookFavouriteRepository;
+import com.example.book_web.repository.BookPostRepository;
 import com.example.book_web.repository.BookRepository;
 import com.example.book_web.urlcontroler.responseModel.ResponseListBookFavourite;
 import com.example.book_web.urlcontroler.responseModel.ResponseListBookPosted;
@@ -10,21 +13,24 @@ import com.example.book_web.urlcontroler.requestModel.PostBookForm;
 import com.example.book_web.urlcontroler.responseModel.ResponseListBookOrderByCategory;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
+
 @Service
 public class BookServices {
     /*Injection object connection using constructor injection*/
     private final Connection connection;
     private final BookRepository bookRepository;
     private final BookCategoryRepository bookCategoryRepository;
-    public BookServices(Connection connection, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository) {
+    private final BookFavouriteRepository bookFavouriteRepository;
+    private final BookPostRepository bookPostRepository;
+    public BookServices(Connection connection, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, BookFavouriteRepository bookFavouriteRepository, BookPostRepository bookPostRepository) {
         this.connection = connection;
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
+        this.bookFavouriteRepository = bookFavouriteRepository;
+        this.bookPostRepository = bookPostRepository;
     }
 
     //Method purpose to get list book categories
@@ -104,41 +110,24 @@ public class BookServices {
         }
     }
 
-    //Method disfavoured book
-    public String disFavouriteBook(String userPhone, String bookId){
-        String query;
-        query = "DELETE FROM `book`.`book_favourite` WHERE (`user_phone` = '" + userPhone + "') and (`book_id` = '" + bookId + "');";
+    //Method dis-favoured book
+    public String disFavouriteBook(String userPhone, int bookId){
         try {
-            Statement statement = connection.createStatement();
-            if(statement.executeUpdate(query) == 1){
-                return "Dislike success!";
-            }
-        }catch (SQLException exception){
+            bookFavouriteRepository.disFavourite(userPhone, bookId);
+            return "Dislike success!";
+        }catch (Exception exception){
             exception.printStackTrace();
-            return  "Server internal error. Dislike failed!";
         }
-        return  "Dislike failed!";
+        return "Dislike filed!";
     }
 
     //Method add favoured book
-    public String addFavouriteBook(String userPhone, String bookId){
-        String query;
-
+    public String addFavouriteBook(String userPhone, int bookId){
         try {
-            Statement statement = connection.createStatement();
-            query = "SELECT book_id FROM `book`.`book_favourite` WHERE book_id = '" + bookId + "' AND user_phone = '" + userPhone + "';";
-            ResultSet resultSet = statement.executeQuery(query);
-            if (resultSet.next()){
-                return "Duplicate data. Add failed!";
-            }else {
-                query = "INSERT INTO `book`.`book_favourite` (`user_phone`, `book_id`) VALUES ('" + userPhone + "', '" + bookId + "');";
-                if(statement.executeUpdate(query) == 1){
-                    return "Add success!";
-                }
-            }
-        }catch (SQLException exception){
+            bookFavouriteRepository.addFavouriteBook(userPhone, bookId);
+            return "Add success!";
+        }catch (Exception exception){
             exception.printStackTrace();
-            return  "Server internal error. Add failed!";
         }
         return  "Add failed!";
     }
@@ -149,26 +138,43 @@ public class BookServices {
         try{
             Statement statement = connection.createStatement();
             for(int i = 0; i < bookForm.listPostBook.size(); i++){
-
+                Books book = new Books();
+                book.setBookId(bookForm.listPostBook.get(i).getBookId());
+                book.setBookTitle(bookForm.listPostBook.get(i).getBookTitle());
+                book.setCategoryId(bookForm.listPostBook.get(i).getCategoryId());
+                book.setLinkPhoto(bookForm.listPostBook.get(i).getLinkPhoto());
+                book.setReleaseYear(bookForm.listPostBook.get(i).getReleaseYear());
+                book.setDescription(bookForm.listPostBook.get(i).getDescription());
+                book.setAuthor(bookForm.listPostBook.get(i).getAuthor());
+                book.setPrice(bookForm.getListPostBook().get(i).getPrice());
+                book.setAmount(bookForm.listPostBook.get(i).getAmount());
+                bookRepository.save(book);
+                BookPost bookPost = new BookPost();
+                Date date = new Date();
+                Timestamp timestamp = new Timestamp(date.getTime());
+                bookPost.setTimestamp(timestamp);
+                bookPost.setBookId(bookForm.listPostBook.get(i).getBookId());
+                bookPost.setUserPhone(bookForm.getUserPhone());
+                bookPostRepository.save(bookPost);
                 //Insert book to table "book_storage"
-                query = "INSERT IGNORE INTO `book`.`book_storage` (`book_id`, `book_title`, `category_id`, `link_photo`, `release_year`, `description`, `author`, `price`, `amount`) \n" +
-                        "VALUES ('" + bookForm.listPostBook.get(i).getBookId() +"', '" +
-                        bookForm.listPostBook.get(i).getBookTitle() + " '," +
-                        " '" + bookForm.listPostBook.get(i).getCategoryId() + "', " +
-                        "'" + bookForm.listPostBook.get(i).getLinkPhoto() + "'," +
-                        " '" + bookForm.listPostBook.get(i).getReleaseYear() + "'," +
-                        " '" + bookForm.listPostBook.get(i).getDescription() + "'," +
-                        " '" + bookForm.listPostBook.get(i).getAuthor() + "'," +
-                        " '" + bookForm.listPostBook.get(i).getPrice() + "'," +
-                        " '" + bookForm.listPostBook.get(i).getAmount() + "');\n";
-                statement.executeUpdate(query);
-
-                //Insert information about user post book to table "book_post"
-                query = "INSERT IGNORE INTO `book`.`book_post` (`user_phone`, `book_id`) " +
-                        "VALUES ('" + bookForm.getUserPhone() + "', '" + bookForm.listPostBook.get(i).getBookId() + "');";
-                statement.executeUpdate(query);
+//                query = "INSERT IGNORE INTO `book`.`book_storage` (`book_id`, `book_title`, `category_id`, `link_photo`, `release_year`, `description`, `author`, `price`, `amount`) \n" +
+//                        "VALUES ('" + bookForm.listPostBook.get(i).getBookId() +"', '" +
+//                        bookForm.listPostBook.get(i).getBookTitle() + " '," +
+//                        " '" + bookForm.listPostBook.get(i).getCategoryId() + "', " +
+//                        "'" + bookForm.listPostBook.get(i).getLinkPhoto() + "'," +
+//                        " '" + bookForm.listPostBook.get(i).getReleaseYear() + "'," +
+//                        " '" + bookForm.listPostBook.get(i).getDescription() + "'," +
+//                        " '" + bookForm.listPostBook.get(i).getAuthor() + "'," +
+//                        " '" + bookForm.listPostBook.get(i).getPrice() + "'," +
+//                        " '" + bookForm.listPostBook.get(i).getAmount() + "');\n";
+//                statement.executeUpdate(query);
+//
+//                //Insert information about user post book to table "book_post"
+//                query = "INSERT IGNORE INTO `book`.`book_post` (`user_phone`, `book_id`) " +
+//                        "VALUES ('" + bookForm.getUserPhone() + "', '" + bookForm.listPostBook.get(i).getBookId() + "');";
+//                statement.executeUpdate(query);
             }
-        }catch (SQLException exception){
+        }catch (Exception exception){
             exception.printStackTrace();
             return "Post book failed!";
         }

@@ -46,7 +46,7 @@ public class UserServices {
 
     /* Method login will be return notification whether success or failed
     after execute logic compere userPhone and userPassword with data on database */
-    public String userLogin(String userPhone, String userPassword){
+    public boolean userLogin(String userPhone, String userPassword){
         String query, phone = null, password = null;
         try {
             //Build statement to query password by userPhone
@@ -67,19 +67,15 @@ public class UserServices {
                 password = resultSet.getString("user_password");
                 //Logic check whether password is same with password on database
                 if(password.equals(userPassword)){
-                    return "Login Success!";
-                }else {
-                    return "Incorrect password";
+                    return true;
                 }
             }else {
                 System.out.println("Account number phone: " + userPhone + " not exist! \nLogin filed!");
-
             }
         }catch (SQLException exception){
             exception.printStackTrace();
-            return "Sever internal error, login failed!";
         }
-       return "Account number phone: " + userPhone + " not exist! \nLogin filed!";
+       return false;
     }
 
     /*Method register require userPhone and userEmail has already not yet register before

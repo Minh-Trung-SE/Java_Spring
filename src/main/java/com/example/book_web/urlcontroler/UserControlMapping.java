@@ -5,11 +5,13 @@ import com.example.book_web.urlcontroler.requestModel.ChangePasswordForm;
 import com.example.book_web.entity.Users;
 import com.example.book_web.services.UserServices;
 import com.example.book_web.urlcontroler.responseModel.ResponseUserProfile;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 
-@RestController
+@Controller
 public class UserControlMapping {
     private final UserServices userServices;
 
@@ -17,9 +19,23 @@ public class UserControlMapping {
         this.userServices = userServices;
     }
 
+    @GetMapping(value = "/home")
+    public String index(Model model){
+        Users userLogin = new Users();
+        model.addAttribute("userLogin", userLogin);
+        return "index";
+    }
+
     @PostMapping(value = "/user/login")
-    public String Login(@RequestBody Users user) {
-        return userServices.userLogin(user.getUserPhone(), user.getUserPassword());
+    public String Login(Model model, @ModelAttribute("userLogin") Users user){
+        String userPhone, userPassword, status;
+
+        userPhone = user.getUserPhone();
+        userPassword = user.getUserPassword();
+        if(userServices.userLogin(userPhone, userPassword)){
+            return "home";
+        }
+        return "redirect:/home";
     }
 
     @PostMapping(value = "/user/register")

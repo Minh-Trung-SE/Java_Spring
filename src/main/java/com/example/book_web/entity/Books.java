@@ -10,9 +10,8 @@ import javax.persistence.*;
 @Getter @Setter
 public class Books {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "book_id")
-    private String bookId;
+    private int bookId;
     @Column(name = "book_title")
     private String bookTitle;
     @Column(name = "category_id")

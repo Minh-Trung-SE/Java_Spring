@@ -122,9 +122,9 @@
 }
 
 #Home {
+    width: 100%;
     height: 730px;
     overflow: hidden;
-    width: 100%;
     background-image: url("img/Book.jpg");
     background-position: center;
     background-repeat: no-repeat;

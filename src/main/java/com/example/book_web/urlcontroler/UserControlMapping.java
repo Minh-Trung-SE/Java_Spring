@@ -19,7 +19,7 @@ public class UserControlMapping {
         this.userServices = userServices;
     }
 
-    @GetMapping(value = "/home")
+    @GetMapping(value = {"/home", "/"})
     public String index(Model model){
         Users userLogin = new Users();
         model.addAttribute("userLogin", userLogin);

@@ -21,15 +21,14 @@ public class UserControlMapping {
 
     @GetMapping(value = {"/home", "/"})
     public String index(Model model){
-        Users userLogin = new Users();
-        model.addAttribute("userLogin", userLogin);
+        Users user = new Users();
+        model.addAttribute("user", user);
         return "index";
     }
 
     @PostMapping(value = "/user/login")
-    public String Login(Model model, @ModelAttribute("userLogin") Users user){
+    public String Login(Model model, @ModelAttribute("user") Users user){
         String userPhone, userPassword, status;
-
         userPhone = user.getUserPhone();
         userPassword = user.getUserPassword();
         if(userServices.userLogin(userPhone, userPassword)){
@@ -37,28 +36,19 @@ public class UserControlMapping {
         }
         return "redirect:/home";
     }
-
+    @ResponseBody
     @PostMapping(value = "/user/register")
-    public String Register(@RequestBody Users user) throws SQLException {
-        if(!userServices.isValidNumberPhone(user.getUserPhone())){
-            return "Number phone: " + user.getUserPhone() + " wrong format. Register failed!";
+    public String Register(Model model, @ModelAttribute("user") Users user){
+        if(userServices.userRegister(user)){
+            return "Register Success!";
         }
-        if (!userServices.isValidGmail(user.getUserEmail())){
-            return "Email: " + user.getUserEmail() + " wrong format. Register failed!";
-        }
-        if (!userServices.isValidPassword(user.getUserPassword())){
-            return "Password: " + user.getUserPassword() + " wrong format. Register failed!";
-        }
-        return userServices.userRegister(user);
+        return "Register failed!";
     }
 
+    @ResponseBody
     @GetMapping(value = "/user/profile")
     public ResponseUserProfile showProfile(@RequestParam(value = "userPhone") String userPhone){
-        if(userServices.isValidNumberPhone(userPhone)){
-           return userServices.geProfileUser(userPhone);
-        }else {
-            return null;
-        }
+        return userServices.geProfileUser(userPhone);
     }
 
     @PostMapping (value = "/user/profile/change-password")

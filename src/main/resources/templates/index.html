@@ -24,18 +24,17 @@
                  <a href="#"><i class="fa fa-twitter-square fa-6"></i></a>
              </div>
 
-             <form id="login" class="input-group" th:action="@{/user/login}" th:object="${userLogin}"  method="POST">
+             <form id="login" class="input-group" th:action="@{/user/login}" th:object="${user}"  method="POST">
                  <input type="text" th:field="*{userPhone}" class="input-field" placeholder="User Phone" required/>
                  <input type="password" th:field="*{userPassword}" class="input-field" placeholder="Enter Password" required/>
-                 <input type="checkbox" class="check-box" /><span>Remember Password</span>
                  <button type="submit" class="submit-btn">Log In</button>
              </form>
 
-             <form id="register" class="input-group">
-                 <input type="text" class="input-field" placeholder="User Phone" required />
-                 <input type="email" class="input-field" placeholder="Enter Email" required />
-                 <input type="text" class="input-field" placeholder="Enter Password" required />
-                 <input type="checkbox" class="check-box" /><span>I agree to the terms & conditions</span>
+             <form id="register" class="input-group" th:action="@{/user/register}" th:object="${user}"  method="POST">
+                 <input type="text" th:field="*{userPhone}" class="input-field" placeholder="User Phone" required />
+                 <input type="text" th:field = "*{userName}" class="input-field" placeholder="Enter UserName" required />
+                 <input type="text" th:field = "*{userPassword}" class="input-field" placeholder="Enter Password" required />
+                 <input type="email"th:field = "*{userEmail} " class="input-field" placeholder="Enter Email" required />
                  <button type="submit" class="submit-btn">Register</button>
              </form>
          </div>

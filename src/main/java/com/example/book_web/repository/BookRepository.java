@@ -9,4 +9,5 @@ import java.util.ArrayList;
 @Repository
 public interface BookRepository extends JpaRepository<Books, Integer> {
     ArrayList<Books> findAllByCategoryId(Integer categoryID);
+    ArrayList<Books> findAllByBookTitle(String bookTitle);
 }

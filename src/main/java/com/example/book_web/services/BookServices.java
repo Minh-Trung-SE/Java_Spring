@@ -235,10 +235,10 @@ public class BookServices {
     }
 
     public ArrayList<Books> searchBookByTitle(String bookTitle){
-        ArrayList<Books> listBooks = new ArrayList<>();
+        ArrayList<Books> listBooks = null;
         try {
-            Statement statement = connection.createStatement();
-        }catch (SQLException exception){
+            listBooks = bookRepository.findAllByBookTitle(bookTitle);
+        }catch (Exception exception){
             exception.printStackTrace();
         }
         return listBooks;

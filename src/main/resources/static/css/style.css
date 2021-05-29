@@ -73,6 +73,7 @@
 
 .input-group {
     top: 180px;
+    color: #FFFFFF;
     position: absolute;
     width: 280px;
     transition: 0.5s;

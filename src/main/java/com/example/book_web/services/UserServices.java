@@ -1,6 +1,7 @@
 package com.example.book_web.services;
 
 import com.example.book_web.entity.Users;
+import com.example.book_web.repository.UserRepository;
 import com.example.book_web.urlcontroler.requestModel.ChangeEmailForm;
 import com.example.book_web.urlcontroler.responseModel.ResponseUserProfile;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,10 @@ import java.util.regex.Pattern;
 public class UserServices {
 
     private final Connection connection;
-
-    public UserServices(Connection connection) {
+    private final UserRepository userRepository;
+    public UserServices(Connection connection, UserRepository userRepository) {
         this.connection = connection;
+        this.userRepository = userRepository;
     }
 
     //Method check valid gmail if gmail contain charters accept and true format if wrong return false if wrong return false
@@ -47,92 +49,43 @@ public class UserServices {
     /* Method login will be return notification whether success or failed
     after execute logic compere userPhone and userPassword with data on database */
     public boolean userLogin(String userPhone, String userPassword){
-        String query, phone = null, password = null;
-        try {
-            //Build statement to query password by userPhone
-            query = "SELECT user_phone, user_password FROM book.users WHERE user_phone = '" + userPhone + "';";
-            //Create statement
-            Statement statement = connection.createStatement();
-            //Create result set to receive userPhone and userPassword after execute query
-            ResultSet resultSet = statement.executeQuery(query);
-            /*If resultSet is not null make sure that account has register and next step is
-                Check if password provide by user whether correct:
-                    -   if password provide by user correct return message login success
-                    -   else return message login failed incorrect password
-             Else resultSet is null that mean account hasn't already register */
-            if(resultSet.next()){
-                //Receive userPhone
-                phone = resultSet.getString("user_phone");
-                //Receive userPassword
-                password = resultSet.getString("user_password");
-                //Logic check whether password is same with password on database
-                if(password.equals(userPassword)){
-                    return true;
-                }
-            }else {
-                System.out.println("Account number phone: " + userPhone + " not exist! \nLogin filed!");
-            }
-        }catch (SQLException exception){
-            exception.printStackTrace();
+        Users user = userRepository.getUsersByUserPhoneAndUserPassword(userPhone, userPassword);
+        if(user == null){
+            return false;
         }
-       return false;
+        return user.getUserPhone().equals(userPhone) && user.getUserPassword().equals(userPassword);
     }
 
     /*Method register require userPhone and userEmail has already not yet register before
     and it will be return notification detail that whether register success or failed     */
-    public String userRegister(Users user){
-        String query;
-        try {
-            //Build query check whether number phone or email has used to register before?
-            query = "SELECT user_phone, user_email " +
-                    "FROM book.users WHERE user_phone = '" + user.getUserPhone() +
-                    "' OR user_email = '"+ user.getUserEmail() + "';";
-            //Create Statement
-            Statement statement = connection.createStatement();
-            //Create result set
-            ResultSet resultSet = statement.executeQuery(query);
-            /*If resultSet have any result it make sure that email or number phone has register before
-              and prevent insert duplicate data on database*/
-            if(resultSet.next()){
-                //If clause true return notification this number phone has register before
-                if(user.getUserPhone().equals(resultSet.getString("user_phone"))){
-                    return "Number phone: " + user.getUserPhone() +" has user by another account. Register Filed!";
-                }
-                //If clause true return notification this email has register before
-                if(user.getUserEmail().equals(resultSet.getString("user_email"))){
-                    return "Email: " + user.getUserEmail() +" has user by another account. Register Filed!";
-                }
-            }
-            //If after check and make sure that that number phone and email is unique, implement build query to insert data
-            query = "INSERT INTO `book`.`users` (`user_phone`, `user_name`, `user_password`, `user_email`) VALUES " +
-                    "('" + user.getUserPhone() + "','" +
-                    user.getUserName() + "','" +
-                    user.getUserPassword() + "','" +
-                    user.getUserEmail() + "');";
-            //Execute query to insert data
-            statement.executeUpdate(query);
-        }catch (SQLException exception){
-            exception.printStackTrace();
-            return "Internal error, Register failed!";
+    public boolean userRegister(Users user){
+        Users existUser = null;
+        if(!isValidGmail(user.getUserEmail()) || !isValidPassword(user.getUserPassword()) || !isValidNumberPhone(user.getUserPhone())){
+            return false;
         }
-        return "Register success!";
+        try {
+            existUser = userRepository.getUsersByUserPhoneOrUserEmail(user.getUserPhone(), user.getUserEmail());
+            if (existUser != null){
+                return false;
+            }
+            userRepository.save(user);
+            return true;
+        }catch (Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
     }
 
     //Method will return all information of user
     public ResponseUserProfile geProfileUser(String userPhone){
-        String query, userName = null, userEmail = null;
+        ResponseUserProfile responseUserProfile = null;
         try {
-            Statement statement = connection.createStatement();
-            query = "SELECT * FROM `book`.`users` WHERE user_phone = '" + userPhone + "';";
-            ResultSet resultSet = statement.executeQuery(query);
-            if(resultSet.next()){
-                userEmail = resultSet.getString("user_email");
-                userName = resultSet.getString("user_name");
-            }
-        }catch (SQLException exception){
+            Users user = userRepository.getUsersByUserPhone(userPhone);
+            responseUserProfile = new ResponseUserProfile(user.getUserPhone(), user.getUserEmail(), user.getUserName());
+        }catch (Exception exception){
             exception.printStackTrace();
         }
-        return new ResponseUserProfile(userPhone, userName, userEmail);
+        return responseUserProfile;
     }
 
     //Method to change user password
@@ -158,18 +111,6 @@ public class UserServices {
         }
     }
 
-    /*Method change user email after check and make sure that userPhone, userNewEmail true format
-        Step 1: Check user phone and password if both true then allow user change email
-                    if wrong exit method return notification failed!
-        Step 2: Must past step 1
-                -   Check whether new email same old email if same exit method this mean also change email failed
-                -   Continue to check whether new email provide by user already user by another account
-                        if not exit move step 3
-                        else exit method and notification that change email failed
-       Step 3: Execute query update data
-                        if success return notification success!
-                        else return notification failed!
-*/
     public String changeGmail(ChangeEmailForm emailForm){
         String query;
         try {

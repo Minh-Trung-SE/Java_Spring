@@ -15,4 +15,5 @@ public class ResponseUserProfile {
         this.userName = userName;
         this.userEmail = userEmail;
     }
+
 }

@@ -25,17 +25,11 @@ public class UserControlMapping {
         model.addAttribute("user", user);
         return "index";
     }
-
-    @PostMapping(value = "/user/login")
-    public String Login(Model model, @ModelAttribute("user") Users user){
-        String userPhone, userPassword, status;
-        userPhone = user.getUserPhone();
-        userPassword = user.getUserPassword();
-        if(userServices.userLogin(userPhone, userPassword)){
-            return "home";
-        }
-        return "redirect:/home";
+    @GetMapping(value = "/loginSuccess")
+    public String loginSuccess(){
+        return "home";
     }
+
     @ResponseBody
     @PostMapping(value = "/user/register")
     public String Register(Model model, @ModelAttribute("user") Users user){

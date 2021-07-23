@@ -4,21 +4,37 @@ import com.example.book_web.entity.Users;
 import com.example.book_web.repository.UserRepository;
 import com.example.book_web.urlcontroler.requestModel.ChangeEmailForm;
 import com.example.book_web.urlcontroler.responseModel.ResponseUserProfile;
+import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.Entity;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 @Service
-public class UserServices {
+public class UserServices implements UserDetailsService {
 
     private final Connection connection;
     private final UserRepository userRepository;
-    public UserServices(Connection connection, UserRepository userRepository) {
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+
+    public UserServices(Connection connection, UserRepository userRepository, @Lazy BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.connection = connection;
         this.userRepository = userRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     //Method check valid gmail if gmail contain charters accept and true format if wrong return false if wrong return false
@@ -68,6 +84,7 @@ public class UserServices {
             if (existUser != null){
                 return false;
             }
+            user.setUserPassword(bCryptPasswordEncoder.encode(user.getUserPassword()));
             userRepository.save(user);
             return true;
         }catch (Exception exception){
@@ -143,5 +160,20 @@ public class UserServices {
             exception.printStackTrace();
         }
         return "Change gmail failed!";
+    }
+
+
+    @Override
+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        System.out.println(s);
+        Users user = userRepository.findUsersByUserPhone(s);
+        if(user == null){
+            throw new RuntimeException("User " + s + "not found!");
+        }
+        List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
+        GrantedAuthority authority = new SimpleGrantedAuthority(user.getUser_role());
+        grantedAuthorityList.add(authority);
+
+        return new User(user.getUserName(), user.getUserPassword(), grantedAuthorityList);
     }
 }

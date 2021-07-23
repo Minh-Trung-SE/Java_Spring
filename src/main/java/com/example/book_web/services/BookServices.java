@@ -187,10 +187,11 @@ public class BookServices {
         ArrayList<ResponseListBookPosted>  listBookPosted = new ArrayList<>();
         try {
             Statement statement = connection.createStatement();
-            query = "SELECT `date_post`, `link_photo`, `book_title`, `price`, `release_year` FROM `book`.book_post\n" +
-                    "LEFT JOIN `book`.`book_storage` ON book_storage.book_id = book_post.book_id\n" +
+            query = "SELECT `date_post`, `link_photo`, `book_title`, `price`, `release_year` FROM `book_post`\n" +
+                    "LEFT JOIN `book_storage` ON book_storage.book_id = book_post.book_id\n" +
                     "WHERE book_post.user_phone = " + userPhone + " ORDER BY " + orderBy + " " + order +";";
             ResultSet resultSet = statement.executeQuery(query);
+            System.out.println(query);
             while (resultSet.next()){
                 ResponseListBookPosted bookPosted = new ResponseListBookPosted();
                 bookPosted.setTimePosted(resultSet.getTimestamp("date_post"));

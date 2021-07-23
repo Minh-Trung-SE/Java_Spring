@@ -21,4 +21,10 @@ public class Users {
     private String userName;
     @Column(name = "user_email")
     private String userEmail;
+    @Column (name = "role")
+    private String user_role;
+    @Column (name = "token")
+    private String user_token;
+    @Column (name = "expired_time")
+    private String expired_time;
 }

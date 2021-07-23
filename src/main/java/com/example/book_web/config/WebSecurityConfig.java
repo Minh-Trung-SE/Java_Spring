@@ -44,9 +44,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().and().formLogin()
                 .loginProcessingUrl("/user/login")
                 .loginPage("/home")
-                .defaultSuccessUrl("/loginSuccess")
-                .failureUrl("/home")
                 .usernameParameter("userPhone")
-                .passwordParameter("userPassword");
+                .passwordParameter("userPassword")
+                .defaultSuccessUrl("/loginSuccess")
+                .failureUrl("/home");
     }
 }
